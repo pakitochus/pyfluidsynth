@@ -22,6 +22,7 @@
 
 from ctypes import *
 from ctypes.util import find_library
+import os
 
 
 # A short circuited or expression to find the FluidSynth library
@@ -196,10 +197,6 @@ fluid_get_stdout = cfunc('fluid_get_stdout', c_int)
 
 new_fluid_cmd_handler = cfunc('new_fluid_cmd_handler', c_void_p,
                               ('synth', c_void_p, 1))
-
-fluid_source = cfunc('fluid_source', c_int,
-                     ('handler', c_void_p, 1),
-                     ('filename', c_char_p, 1))
 
 fluid_command = cfunc('fluid_command', c_int,
                       ('handler', c_void_p, 1),
@@ -418,14 +415,17 @@ class Synth:
         return information
 
     def get_instrument_list(self, sfontid):
-        """
+        """ Gets the instrument list and
         :param sfontid: Soundfont ID
         :return:
         """
-        amigo = new_fluid_cmd_handler(self.synth)
-        fluid_source(amigo, "hola.log")
-        fluid_command(amigo, "inst " + str(sfontid), fluid_get_stdout())
-        return fluid_get_stdout()
+
+        handler = new_fluid_cmd_handler(self.synth)
+        newshell = StdoutHandler("hello")
+        newshell.freopen()
+        fluid_command(handler, "inst " + str(sfontid), fluid_get_stdout())
+        newshell.freclose()
+        return None
 
 
 def raw_audio_string(data):
@@ -438,3 +438,39 @@ def raw_audio_string(data):
     import numpy
 
     return (data.astype(numpy.int16)).tostring()
+
+
+class StdoutHandler(object):
+    def __init__(self, f):
+        """Create new stdouthandler, for management of stdin and
+        stdout (some methods of Synth DO need to capture stdout stream).
+        """
+        self.prevOutFd = os.dup(1)
+        self.prevInFd = os.dup(0)
+        self.prevErrFd = os.dup(2)
+        self.newf = open(f, 'w')
+        self.newfd = self.newf.fileno()  # The new file output
+
+
+    def freopen(self):
+        """
+        Redirects the standard input, output and error stream
+        to the established newfd.
+        :return:
+        """
+        os.dup2(self.newfd, 0)
+        os.dup2(self.newfd, 1)
+        os.dup2(self.newfd, 2)
+
+    def freclose(self):
+        """
+        Closes the modified input, output and error stream
+        :return:
+        """
+        self.newf.close()
+        os.dup2(self.prevOutFd, 1)
+        os.close(self.prevOutFd)
+        os.dup2(self.prevInFd, 0)
+        os.close(self.prevInFd)
+        os.dup2(self.prevErrFd,2)
+        os.close(self.prevErrFd)
