@@ -427,14 +427,12 @@ class Synth:
         fluid_command(handler, "inst " + str(sfontid), fluid_get_stdout())
         newshell.freclose()
 
-        # TODO think a better way to order everything here.
-        instruments = {'bank': [], 'preset': [], 'name': []}  # A list of dictionaries for instruments
+        # It builds a dictionary with keys BBB-PPP (bank-preset) and
+        # the name of the instrument preset.
+        # How-to-call: inst[str(bank).zfill(3) + '-' + str(program).zfill(3)]
+        instruments = dict()
         for line in open(fname):
-            instruments['bank'].append(int(line[0:3]))
-            instruments['preset'].append(int(line[4:7]))
-            instruments['name'].append(line[8:-1])
-        # with open(fname) as f:
-        #    instruments = f.readlines()
+            instruments[line[0:7]] = line[8:-1]
         return instruments
 
 
