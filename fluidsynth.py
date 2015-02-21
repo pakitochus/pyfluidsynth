@@ -419,13 +419,23 @@ class Synth:
         :param sfontid: Soundfont ID
         :return:
         """
-
+        fname = ".instSF" + str(sfontid)  # TEmporary file with the info of the SF2
         handler = new_fluid_cmd_handler(self.synth)
-        newshell = StdoutHandler("hello")
+        # TODO Check if .instSF is created before and avoid repeating the process.
+        newshell = StdoutHandler(fname)
         newshell.freopen()
         fluid_command(handler, "inst " + str(sfontid), fluid_get_stdout())
         newshell.freclose()
-        return None
+
+        # TODO think a better way to order everything here.
+        instruments = {'bank': [], 'preset': [], 'name': []}  # A list of dictionaries for instruments
+        for line in open(fname):
+            instruments['bank'].append(int(line[0:3]))
+            instruments['preset'].append(int(line[4:7]))
+            instruments['name'].append(line[8:-1])
+        # with open(fname) as f:
+        #    instruments = f.readlines()
+        return instruments
 
 
 def raw_audio_string(data):
