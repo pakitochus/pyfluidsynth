@@ -417,7 +417,9 @@ class Synth:
     def get_instrument_list(self, sfontid):
         """ Gets the instrument list and
         :param sfontid: Soundfont ID
-        :return:
+        :return: A dictionary with keys BBB-PPP (bank-preset) and
+        the name of the instrument preset. Example of how to access a preset's name:
+            inst[str(bank).zfill(3) + '-' + str(program).zfill(3)]
         """
         fname = ".instSF" + str(sfontid)  # TEmporary file with the info of the SF2
         handler = new_fluid_cmd_handler(self.synth)
@@ -427,10 +429,7 @@ class Synth:
         fluid_command(handler, "inst " + str(sfontid), fluid_get_stdout())
         newshell.freclose()
 
-        # It builds a dictionary with keys BBB-PPP (bank-preset) and
-        # the name of the instrument preset.
-        # How-to-call: inst[str(bank).zfill(3) + '-' + str(program).zfill(3)]
-        instruments = dict()
+        instruments = dict()  # It builds the list as a dictionary
         for line in open(fname):
             instruments[line[0:7]] = line[8:-1]
         return instruments
