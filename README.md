@@ -178,7 +178,7 @@ the functions incorrectly sometimes.
 ## AUTHORS
 
 Original code by Nathan Whitehead `<nwhitehe@gmail.com>`.
-Contributions by Bart Spaans `<onderstekop@gmail.com>`.
+Contributions by Bart Spaans `<onderstekop@gmail.com>` and Francisco J. Martinez `<pakitochus@gmail.com>`.
 
 
 ## LICENSE
