@@ -57,7 +57,7 @@ fs.noteoff(0, 76)
 time.sleep(2.0)
 
 # Print the number of active voices (after noteoff messages)
-# Some voices might be still active is
+# Some voices might be still active
 print "Active voices: " + str(fs.count_active_voices())
 print "CPU load: " + "%0.2f" % (fs.get_cpu_load()) + "%"
 
