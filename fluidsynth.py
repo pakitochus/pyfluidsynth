@@ -423,15 +423,20 @@ class Synth:
         """
         fname = ".instSF" + str(sfontid)  # TEmporary file with the info of the SF2
         handler = new_fluid_cmd_handler(self.synth)
-        # TODO Check if .instSF is created before and avoid repeating the process.
-        newshell = StdoutHandler(fname)
-        newshell.freopen()
-        fluid_command(handler, "inst " + str(sfontid), fluid_get_stdout())
-        newshell.freclose()
 
         instruments = dict()  # It builds the list as a dictionary
-        for line in open(fname):
-            instruments[line[0:7]] = line[8:-1]
+        # First, check if .instSF is created before and avoid repeating the process.
+        try:
+            for line in open(fname):
+                instruments[line[0:7]] = line[8:-1]  # If possible, returns the instrument list
+        except IOError:  # Creates the instrument list if it doesn't exist
+            newshell = StdoutHandler(fname)
+            newshell.freopen()
+            fluid_command(handler, "inst " + str(sfontid), fluid_get_stdout())
+            newshell.freclose()
+            for line in open(fname):
+                instruments[line[0:7]] = line[8:-1]
+
         return instruments
 
 
