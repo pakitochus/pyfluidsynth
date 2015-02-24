@@ -25,7 +25,7 @@ channel = 0
 fs.program_select(channel, sfid, bank, preset)
 fs.noteon(0, 60, 80)  # (Channel, note, velocity)
 fs.noteon(0, 67, 80)
-fs.noteon(0, 76, 80)  # We can't play that note, because polyphony=2
+fs.noteon(0, 76, 80)  # We can't play that note, because polyphony=2, you should get an warning here
 
 # This way we check the information of the instrument loaded in a certain channel
 information = fs.get_channel_info(channel)
