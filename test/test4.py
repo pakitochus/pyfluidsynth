@@ -36,13 +36,16 @@ preset = information.program
 insts = fs.get_instrument_list(sfid)
 print "Playing " + insts[str(bank).zfill(3) + '-' + str(preset).zfill(3)]
 
-# Count the number of active voices
+# Count the number of active voices and CPU load
 print "Active voices: " + str(fs.count_active_voices())
+print "CPU load: " + "%0.2f" % (fs.get_cpu_load()) + "%"
+
 
 # Augment the polyphony and play another note
 fs.set_polyphony(128)
 fs.noteon(0, 76, 80)
 print "Active voices: " + str(fs.count_active_voices())
+print "CPU load: " + "%0.2f" % (fs.get_cpu_load()) + "%"
 
 time.sleep(1.0)
 
@@ -56,5 +59,6 @@ time.sleep(2.0)
 # Print the number of active voices (after noteoff messages)
 # Some voices might be still active is
 print "Active voices: " + str(fs.count_active_voices())
+print "CPU load: " + "%0.2f" % (fs.get_cpu_load()) + "%"
 
 fs.delete()
