@@ -1,23 +1,25 @@
 """
-================================================================================
+=============
+pyFluidSynth
+=============
+Python bindings for FluidSynth
 
-        pyFluidSynth
+Author: Nathan Whitehead
+Contact: nwhitehe@gmail.com
+Version: 0.7
+Date: 2015-02-24
 
-        Python bindings for FluidSynth
+Copyright 2008--2015, Nathan Whitehead <nwhitehe@gmail.com>
+Released under the LGPL
 
-        Copyright 2008--2015, Nathan Whitehead <nwhitehe@gmail.com>
-        Released under the LGPL
-
-        This module contains python bindings for FluidSynth.  FluidSynth is a
-        software synthesizer for generating music.  It works like a MIDI
-        synthesizer.  You load patches, set parameters, then send NOTEON and
-        NOTEOFF events to play notes.  Instruments are defined in SoundFonts,
-        generally files with the extension SF2.  FluidSynth can either be used
-        to play audio itself, or you can call a function that returns chunks
-        of audio data and output the data to the soundcard yourself.
-        FluidSynth works on all major platforms, so pyFluidSynth should also.
-
-================================================================================
+This module contains python bindings for FluidSynth.  FluidSynth is a
+software synthesizer for generating music.  It works like a MIDI
+synthesizer.  You load patches, set parameters, then send NOTEON and
+NOTEOFF events to play notes.  Instruments are defined in SoundFonts,
+generally files with the extension SF2.  FluidSynth can either be used
+to play audio itself, or you can call a function that returns chunks
+of audio data and output the data to the soundcard yourself.
+FluidSynth works on all major platforms, so pyFluidSynth should also.
 """
 
 from ctypes import *
@@ -453,6 +455,9 @@ def raw_audio_string(data):
 
 
 class StdoutHandler(object):
+    """Helper class for the capture of the Standard Output Stream.
+    This is needed for some functions of class Synth.
+    """
     def __init__(self, f):
         """Create new stdouthandler, for management of stdin and
         stdout (some methods of Synth DO need to capture stdout stream).
