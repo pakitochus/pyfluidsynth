@@ -211,11 +211,26 @@ fluid_synth_get_channel_info = cfunc('fluid_synth_get_channel_info', c_int,
                                      ('info', POINTER(ChannelInfo), 1))
 
 
+# Create a new MIDI driver instance.
+new_fluid_midi_driver = cfunc('new_fluid_midi_driver', c_void_p,
+                              ('settings', c_void_p, 1),
+                              ('handler', c_void_p, 1),
+                              ('event_handler_data', c_void_p, 1))
+
+# Delete a MIDI driver instance.
+delete_fluid_midi_driver = cfunc('delete_fluid_midi_driver', c_void_p,
+                                 ('driver', c_void_p, 1))
+
+fluid_synth_handle_midi_event = cfunc('fluid_synth_handle_midi_event', c_int,
+                                      ('data', c_void_p, 1),
+                                      ('event', c_void_p, 1))
+
+
 def fluid_synth_write_s16_stereo(synth, len):
     """Return generated samples in stereo 16-bit format
-    
+
     Return value is a Numpy array of samples.
-    
+
     """
     import numpy
 
@@ -248,10 +263,11 @@ class Synth:
         # No reason to limit ourselves to 16 channels
         fluid_settings_setint(st, 'synth.midi-channels', channels)
         self.settings = st
-        self.synth = new_fluid_synth(st)
+        self.synth = new_fluid_synth(self.settings)
         self.audio_driver = None
+        self.midi_driver = None
 
-    def start(self, driver=None):
+    def start(self, audiodriver='alsa'):
         """Start audio output driver in separate background thread
 
         Call this function any time after creating the Synth object.
@@ -259,7 +275,7 @@ class Synth:
         samples.
 
         Optional keyword argument:
-          driver : which audio driver to use for output
+          audiodriver : which audio driver to use for output
                    Possible choices:
                      'alsa', 'oss', 'jack', 'portaudio'
                      'sndmgr', 'coreaudio', 'Direct Sound',
@@ -270,15 +286,17 @@ class Synth:
         your platform.
 
         """
-        if driver is not None:
-            assert (driver in ['alsa', 'oss', 'jack', 'portaudio',
-                               'sndmgr', 'coreaudio', 'Direct Sound', 'pulseaudio'])
-            fluid_settings_setstr(self.settings, 'audio.driver', driver)
+        if audiodriver is not None:
+            assert (audiodriver in ['alsa', 'oss', 'jack', 'portaudio',
+                                    'sndmgr', 'coreaudio', 'Direct Sound', 'pulseaudio'])
+            fluid_settings_setstr(self.settings, 'audio.driver', audiodriver)
         self.audio_driver = new_fluid_audio_driver(self.settings, self.synth)
 
     def delete(self):
         if self.audio_driver is not None:
             delete_fluid_audio_driver(self.audio_driver)
+        if self.midi_driver is not None:
+            delete_fluid_midi_driver(self.midi_driver)
         delete_fluid_synth(self.synth)
         delete_fluid_settings(self.settings)
 
@@ -319,7 +337,7 @@ class Synth:
         A value of -2048 is 1 semitone down.
         A value of 2048 is 1 semitone up.
         Maximum values are -8192 to +8192 (transposing by 4 semitones).
-        
+
         """
         return fluid_synth_pitch_bend(self.synth, chan, val + 8192)
 
@@ -441,6 +459,32 @@ class Synth:
 
         return instruments
 
+    def start_midi(self, mididriver='alsa_seq'):
+        """
+        Starts the MIDI driver to allow the MIDI keyboard interaction.
+        :param mididriver: name of the midi driver, that can be one of these:
+            'alsa_raw', 'alsa_seq', 'coremidi', 'jack',
+            'midishare', 'oss', 'winmidi'
+        :return:
+        """
+        if mididriver is not None:
+            assert (mididriver in ['alsa_raw', 'alsa_seq', 'coremidi', 'jack',
+                                   'midishare', 'oss', 'winmidi'])
+            fluid_settings_setstr(self.settings, 'midi.driver', mididriver)
+            # Optionally: sets the real time priority to 99.
+            fluid_settings_setnum(self.settings, 'midi.realtimeprio', 99)
+        self.midi_driver = new_fluid_midi_driver(self.settings, fluid_synth_handle_midi_event, self.synth)
+        return self.midi_driver
+
+    def stop_midi(self):
+        """
+        Stops the current midi Driver.
+        :return: Nothing
+        """
+        if self.midi_driver is not None:  # Checks if there actually is a midi_driver
+            delete_fluid_midi_driver(self.midi_driver)
+            self.midi_driver = None
+
 
 def raw_audio_string(data):
     """Return a string of bytes to send to soundcard
@@ -458,6 +502,7 @@ class StdoutHandler(object):
     """Helper class for the capture of the Standard Output Stream.
     This is needed for some functions of class Synth.
     """
+
     def __init__(self, f):
         """Create new stdouthandler, for management of stdin and
         stdout (some methods of Synth DO need to capture stdout stream).
@@ -489,5 +534,5 @@ class StdoutHandler(object):
         os.close(self.prevOutFd)
         os.dup2(self.prevInFd, 0)
         os.close(self.prevInFd)
-        os.dup2(self.prevErrFd,2)
+        os.dup2(self.prevErrFd, 2)
         os.close(self.prevErrFd)
