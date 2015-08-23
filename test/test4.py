@@ -4,10 +4,12 @@ in the class Synth.
 """
 import time
 import fluidsynth
+import os
 
+os.nice(50)
 # Create and start the synthesizer with the selected options.
 fs = fluidsynth.Synth(gain=0.1, polyphony=2, channels=16)
-fs.start(audiodriver="pulseaudio")
+fs.start(audiodriver="alsa")
 fs.start_midi()  # Default is alsa_seq
 
 # Test the get_gain and set a new gain:
