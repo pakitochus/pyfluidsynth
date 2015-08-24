@@ -19,16 +19,14 @@ fs.set_gain(0.3)
 print "Updated gain: " + str(fs.get_gain())
 
 # Load a soundfont.
-#sfid = fs.sfload("/usr/share/sounds/sf2/FluidR3_GM.sf2")
-sfid = fs.sfload("/home/pi/chusynth/pyfluidsynth/test/ChusoCol2.sf2")
-#sfid = fs.sfload("/home/pakitochus/Software/Musica/Soundfont/ChusoCol2.sf2")
+sfid = fs.sfload("/usr/share/sounds/sf2/FluidR3_GM.sf2")
 
 preset = 50
 bank = 0
 channel = 0
 
 connectionlist = sequencer.connection_list()
-sender = (20,0)
+sender = (20,0) # Modify according to the current port of the USB MIDI input.
 exclusive = 0
 convert_time = 0
 convert_real = 0
