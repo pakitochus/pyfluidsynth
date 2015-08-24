@@ -4,7 +4,7 @@ import fluidsynth
 fs = fluidsynth.Synth()
 fs.start()
 ## Your installation of FluidSynth may require a different driver.
-## Use something like:
+# Use something like:
 # fs.start(driver="pulseaudio")
 
 sfid = fs.sfload("example.sf2")

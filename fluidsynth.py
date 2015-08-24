@@ -513,7 +513,6 @@ class StdoutHandler(object):
         self.newf = open(f, 'w')
         self.newfd = self.newf.fileno()  # The new file output
 
-
     def freopen(self):
         """
         Redirects the standard input, output and error stream

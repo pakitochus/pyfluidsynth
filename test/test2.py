@@ -1,14 +1,13 @@
-import time
 import numpy
 import pyaudio
 import fluidsynth
 
 pa = pyaudio.PyAudio()
 strm = pa.open(
-    format = pyaudio.paInt16,
-    channels = 2, 
-    rate = 44100, 
-    output = True)
+    format=pyaudio.paInt16,
+    channels=2,
+    rate=44100,
+    output=True)
 
 s = []
 
